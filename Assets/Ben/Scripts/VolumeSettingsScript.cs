@@ -1,10 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class VolumeSettingsScript : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public Slider effectSlider;
+    public Slider musicSlider;
+    public FloatSO effectSO;
+    public FloatSO musicSO;
     void Start()
     {
         
@@ -14,5 +18,14 @@ public class VolumeSettingsScript : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void EffectVolumeChange() 
+    {
+        effectSO.value = effectSlider.value;
+    }
+    public void MusicVolumeChange() 
+    {
+        musicSO.value = musicSlider.value;
     }
 }
