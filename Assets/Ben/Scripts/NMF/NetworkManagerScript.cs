@@ -23,6 +23,8 @@ public class NetworkManagerScript : MonoBehaviour
     [SerializeField]
     GameObject user2GO;
     [SerializeField]
+    GameObject levelSelectionPanel;
+    [SerializeField]
     bool isConnected;
 
     public string usernameInputString;
@@ -48,6 +50,12 @@ public class NetworkManagerScript : MonoBehaviour
             instance = this;
         }
         DontDestroyOnLoad(gameObject);
+        
+       
+    }
+    private void OnLevelWasLoaded()
+    {
+        
     }
     void Start()
     {
@@ -68,7 +76,7 @@ public class NetworkManagerScript : MonoBehaviour
                socket.Blocking = false;
                isConnected = true;
                // GameObject.Find("MainPanel").SetActive(false);
-               GameObject.Find("LobbyPanel").SetActive(false);
+               levelSelectionPanel.SetActive(true);
            }
            else
            {
@@ -80,11 +88,10 @@ public class NetworkManagerScript : MonoBehaviour
 
         usernameSetButton?.onClick.AddListener(() =>
         {
-            print("out");
-            Debug.Log("outie");
+            
             if (usernameInputF.text != null)
             {
-                print("ini");
+                
                 usernameInputString = usernameInputF.text;
                 //  usernamePanel.SetActive(false);
             }
@@ -146,6 +153,20 @@ public class NetworkManagerScript : MonoBehaviour
 
                     // socket.Send(Util.Serialize(movePacket));
                 }
+            }
+            else
+            {
+                try
+                {
+                    user1GO = GameObject.Find("user1");
+                    user2GO = GameObject.Find("user2");
+                }
+                catch 
+                {
+                    print("user finding error");
+                  
+                }
+             
             }
 
             try
@@ -247,5 +268,17 @@ public class NetworkManagerScript : MonoBehaviour
                                     (ip.position.GetVector()),
                                         Quaternion.Euler(ip.rotation.GetVector()));
         //AddInGOList(tempGOMethod);
+    }
+    public void LevelSelectionButton(int i) 
+    {
+       
+            SceneTransitionPacket stp = new SceneTransitionPacket()
+            {
+                sceneIndex = i
+            };
+            sendQueue.Enqueue(stp);
+            SceneManager.LoadScene(stp.sceneIndex);
+       
+    
     }
 }
