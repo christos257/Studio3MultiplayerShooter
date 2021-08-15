@@ -50,12 +50,12 @@ public class NetworkManagerScript : MonoBehaviour
             instance = this;
         }
         DontDestroyOnLoad(gameObject);
-        
-       
+
+
     }
     private void OnLevelWasLoaded()
     {
-        
+
     }
     void Start()
     {
@@ -88,10 +88,10 @@ public class NetworkManagerScript : MonoBehaviour
 
         usernameSetButton?.onClick.AddListener(() =>
         {
-            
+
             if (usernameInputF.text != null)
             {
-                
+
                 usernameInputString = usernameInputF.text;
                 //  usernamePanel.SetActive(false);
             }
@@ -102,6 +102,7 @@ public class NetworkManagerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         // Debug.Log("asdwease");
         if (isConnected)
         {
@@ -161,12 +162,24 @@ public class NetworkManagerScript : MonoBehaviour
                     user1GO = GameObject.Find("user1");
                     user2GO = GameObject.Find("user2");
                 }
-                catch 
+                catch
                 {
                     print("user finding error");
-                  
+
                 }
-             
+
+            }
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                print("test O");
+
+
+                socket.Send(Encoding.ASCII.GetBytes("test<>lola<>pola<>52<>"));
+                //sms.Seek(0, SeekOrigin.Begin);
+                //sbf.Serialize(sms, "test");
+
+                //sms.Seek(0, SeekOrigin.Begin);
+                //socket.Send(sms.ToArray());
             }
 
             try
@@ -264,21 +277,21 @@ public class NetworkManagerScript : MonoBehaviour
         sendQueue.Enqueue(ip);
 
         /*tempGOMethod =*/
-                             Instantiate(Resources.Load<GameObject>(ip.objectName),
-                                    (ip.position.GetVector()),
-                                        Quaternion.Euler(ip.rotation.GetVector()));
+        Instantiate(Resources.Load<GameObject>(ip.objectName),
+               (ip.position.GetVector()),
+                   Quaternion.Euler(ip.rotation.GetVector()));
         //AddInGOList(tempGOMethod);
     }
-    public void LevelSelectionButton(int i) 
+    public void LevelSelectionButton(int i)
     {
-       
-            SceneTransitionPacket stp = new SceneTransitionPacket()
-            {
-                sceneIndex = i
-            };
-            sendQueue.Enqueue(stp);
-            SceneManager.LoadScene(stp.sceneIndex);
-       
-    
+
+        SceneTransitionPacket stp = new SceneTransitionPacket()
+        {
+            sceneIndex = i
+        };
+        sendQueue.Enqueue(stp);
+        SceneManager.LoadScene(stp.sceneIndex);
+
+
     }
 }
