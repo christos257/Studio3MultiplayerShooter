@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/BenGameTestScene.unity
     guid: 2dc25a4757e40cc45a90c106aca354eb
+  - enabled: 1
+    path: Assets/Scenes/SignUpScene.unity
+    guid: 1e9fbaef1bed2c34697e7e6be9be2bc6
   m_configObjects: {}

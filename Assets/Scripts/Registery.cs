@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 [System.Serializable]
 struct UserData
@@ -36,27 +37,52 @@ public class Registery : MonoBehaviour
     [SerializeField] 
     public string getDataserverUrl;
 
+    public InputField firstNameInput;
+    public InputField lastNameInput;
+    public InputField ageInput;
+    public InputField emailInput;
+    public InputField usernameInput;
+    public InputField passwordInput;
+
+    public static string firstNameInputText;
+    public static string lastNameInputText;
+    public static string ageInputText;
+    public static string emailInputText;
+    public static string usernameInputText;
+    public static string passwordInputText;
+
     UserData userData = new UserData()
     {
-        fname = "mustafa",
-        lname = "Sibai",
-        username = "isFat",
-        password = "LoseWeight",
-        age = "28",
-        email = "cmonbruhtoofat@yobruhfatass.fat"
+        fname = firstNameInputText,
+        lname = lastNameInputText,
+        age = ageInputText,
+        email = emailInputText,
+        username = usernameInputText,
+        password = passwordInputText
     };
 
     UsersData[] usersData;
 
     UserData userDatas = new UserData()
     {
-        fname = "mustafa"
+        fname = firstNameInputText
     };
 
     void Start()
     {
+        firstNameInputText = firstNameInput.text;
+        lastNameInputText = lastNameInput.text;
+        ageInputText = ageInput.text;
+        emailInputText = emailInput.text;
+        usernameInputText = usernameInput.text;
+        passwordInputText = passwordInput.text;
         //StartCoroutine(SendUserDataUsingGetRequest(userData.GetDataInUrlEncoding()));
         //StartCoroutine(SendUserDataUsingPostRequest(getDataserverUrl, userData));
+        //StartCoroutine(GetUserDataUsingGetRequest(getDataserverUrl, userDatas.GetNameInUrlEncoding()));
+    }
+
+    public void UserData()
+    {
         StartCoroutine(GetUserDataUsingGetRequest(getDataserverUrl, userDatas.GetNameInUrlEncoding()));
     }
 
