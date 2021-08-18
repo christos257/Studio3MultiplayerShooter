@@ -22,8 +22,9 @@ public class LaserTrapScript : MonoBehaviour
         RaycastHit rHit;
         if (Physics.Raycast(transform.position, transform.forward, out rHit))
         {
-            if (rHit.collider)
+            if (rHit.collider && rHit.collider.tag != "Spinning")
             {
+
                 lr.SetPosition(1, rHit.point);
                 if (rHit.collider.tag == "Player")
                 {
@@ -34,7 +35,7 @@ public class LaserTrapScript : MonoBehaviour
 
 
                 }
-                else if (firePE.activeSelf  )
+                else if (firePE.activeSelf)
                 {
                     firePE.SetActive(false);
                 }
