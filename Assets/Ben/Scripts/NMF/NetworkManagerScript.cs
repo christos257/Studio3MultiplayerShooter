@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using UnityEngine.SceneManagement;
-
+using System;
 public class NetworkManagerScript : MonoBehaviour
 {
     Socket socket;
@@ -26,9 +26,10 @@ public class NetworkManagerScript : MonoBehaviour
     GameObject levelSelectionPanel;
     [SerializeField]
     bool isConnected;
-
+    
     public string usernameInputString;
-
+    string nmID;
+    public bool otherExists;
 
     BinaryFormatter sbf;
     BinaryFormatter rbf;
@@ -51,7 +52,10 @@ public class NetworkManagerScript : MonoBehaviour
         }
         DontDestroyOnLoad(gameObject);
 
-
+        Guid objGuid = Guid.NewGuid();
+        nmID = objGuid.ToString();
+        print(nmID);
+       
     }
     private void OnLevelWasLoaded()
     {
@@ -65,6 +69,7 @@ public class NetworkManagerScript : MonoBehaviour
         rms = new MemoryStream();
         sendQueue = new Queue<BasePacket>();
         isConnected = false;
+        otherExists = false;
 
 
         connectButton?.onClick.AddListener(() =>
@@ -75,6 +80,7 @@ public class NetworkManagerScript : MonoBehaviour
                socket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 4420));
                socket.Blocking = false;
                isConnected = true;
+               StartCoroutine("NetworkingLoop");
                // GameObject.Find("MainPanel").SetActive(false);
                levelSelectionPanel.SetActive(true);
            }
@@ -98,14 +104,17 @@ public class NetworkManagerScript : MonoBehaviour
 
         });
     }
-
-    // Update is called once per frame
-    void Update()
+    IEnumerator NetworkingLoop() 
     {
-
-        // Debug.Log("asdwease");
-        if (isConnected)
+        while (isConnected)
         {
+            if (!otherExists)
+            {
+                ChatPacket cp = new ChatPacket();
+                cp.username = nmID;
+                cp.message = "hey there";
+                sendQueue.Enqueue(cp);
+            }
             if (user1GO != null || user2GO != null)
             {
                 if (usernameInputString == "1")
@@ -169,19 +178,7 @@ public class NetworkManagerScript : MonoBehaviour
                 }
 
             }
-            if (Input.GetKeyDown(KeyCode.O))
-            {
-                print("test O");
-
-
-                socket.Send(Encoding.ASCII.GetBytes("test<>lola<>pola<>52<>"));
-                //sms.Seek(0, SeekOrigin.Begin);
-                //sbf.Serialize(sms, "test");
-
-                //sms.Seek(0, SeekOrigin.Begin);
-                //socket.Send(sms.ToArray());
-            }
-
+          
             try
             {
                 if (sendQueue.Count > 0)
@@ -216,11 +213,15 @@ public class NetworkManagerScript : MonoBehaviour
                 try
                 {
                     BasePacket BP = (BasePacket)rbf.Deserialize(rms);
-
+                    print("revein");
                     switch (BP.packetType)
                     {
                         case BasePacket.type.ChatType:
                             ChatPacket CP = (ChatPacket)BP;
+                            if (CP.message == "hey there")
+                            {
+                                otherExists = true;
+                            }
                             Debug.LogError(CP.username + ": " + CP.message);
                             break;
                         case BasePacket.type.MovementType:
@@ -262,7 +263,186 @@ public class NetworkManagerScript : MonoBehaviour
                 }
 
             }
+            yield return new WaitForSeconds(0.04f);
         }
+
+       
+    }
+    // Update is called once per frame
+    void Update()
+    {
+
+        // Debug.Log("asdwease");
+        //if (isConnected)
+        //{
+        //    if (!otherExists)
+        //    {
+        //        ChatPacket cp = new ChatPacket();
+        //        cp.username = nmID;
+        //        cp.message = "hey there";
+        //        sendQueue.Enqueue(cp);
+        //    }
+        //    if (user1GO != null || user2GO != null)
+        //    {
+        //        if (usernameInputString == "1")
+        //        {
+        //            MovementPacket movePacket = new MovementPacket()
+        //            {
+        //                username = usernameInputString,
+        //                x = user1GO.transform.position.x,
+        //                y = user1GO.transform.position.y,
+        //                z = user1GO.transform.position.z,
+        //                rX = user1GO.transform.eulerAngles.x,
+        //                rY = user1GO.transform.eulerAngles.y,
+        //                rZ = user1GO.transform.eulerAngles.z,
+        //                objectName = "user1"
+
+        //            };
+
+        //            sendQueue.Enqueue(movePacket);
+
+        //            //sms.Seek(0, SeekOrigin.Begin);
+        //            //sbf.Serialize(sms, movePacket);
+        //            //socket.Send(sms.ToArray());
+        //            //sms.Seek(0, SeekOrigin.Begin);
+
+        //            // socket.Send(Util.Serialize(movePacket));
+        //        }
+        //        if (usernameInputString == "2")
+        //        {
+        //            MovementPacket movePacket = new MovementPacket()
+        //            {
+        //                username = usernameInputString,
+        //                x = user2GO.transform.position.x,
+        //                y = user2GO.transform.position.y,
+        //                z = user2GO.transform.position.z,
+        //                rX = user2GO.transform.eulerAngles.x,
+        //                rY = user2GO.transform.eulerAngles.y,
+        //                rZ = user2GO.transform.eulerAngles.z,
+        //                objectName = "user2"
+        //            };
+        //            sendQueue.Enqueue(movePacket);
+
+        //            //sms.Seek(0, SeekOrigin.Begin);
+        //            //sbf.Serialize(sms, movePacket);
+        //            //socket.Send(sms.ToArray());
+        //            //sms.Seek(0, SeekOrigin.Begin);
+
+        //            // socket.Send(Util.Serialize(movePacket));
+        //        }
+        //    }
+        //    else
+        //    {
+        //        try
+        //        {
+        //            user1GO = GameObject.Find("user1");
+        //            user2GO = GameObject.Find("user2");
+        //        }
+        //        catch
+        //        {
+        //            print("user finding error");
+
+        //        }
+
+        //    }
+        //    //if (Input.GetKeyDown(KeyCode.O))
+        //    //{
+        //    //    print("test O");
+
+
+        //    //    socket.Send(Encoding.ASCII.GetBytes("test<>lola<>pola<>52<>"));
+        //    //    //sms.Seek(0, SeekOrigin.Begin);
+        //    //    //sbf.Serialize(sms, "test");
+
+        //    //    //sms.Seek(0, SeekOrigin.Begin);
+        //    //    //socket.Send(sms.ToArray());
+        //    //}
+
+        //    try
+        //    {
+        //        if (sendQueue.Count > 0)
+        //        {
+        //            sms.Seek(0, SeekOrigin.Begin);
+        //            sbf.Serialize(sms, sendQueue.Dequeue());
+
+        //            sms.Seek(0, SeekOrigin.Begin);
+        //            socket.Send(sms.ToArray());
+        //        }
+
+
+
+        //    }
+        //    catch
+        //    {
+
+        //        print("quee error");
+        //    }
+        //    try
+        //    {
+
+
+        //        byte[] buffer = new byte[1024];
+        //        socket.Receive(buffer);
+
+        //        rms.Seek(0, SeekOrigin.Begin);
+        //        rms.Write(buffer, 0, 1024);
+        //        rms.Seek(0, SeekOrigin.Begin);
+
+        //        //BasePacket BP = (BasePacket)Util.Deserialize(buffer);
+        //        try
+        //        {
+        //            BasePacket BP = (BasePacket)rbf.Deserialize(rms);
+        //            print("revein");
+        //            switch (BP.packetType)
+        //            {
+        //                case BasePacket.type.ChatType:
+        //                    ChatPacket CP = (ChatPacket)BP;
+        //                    if (CP.message=="hey there")
+        //                    {
+        //                        otherExists = true;
+        //                    }
+        //                    Debug.LogError(CP.username + ": " + CP.message);
+        //                    break;
+        //                case BasePacket.type.MovementType:
+        //                    MovementPacket MP = (MovementPacket)BP;
+        //                    GameObject g = GameObject.Find(MP.objectName);
+        //                    g.transform.position = new Vector3(MP.x, MP.y, MP.z);
+        //                    g.transform.rotation = Quaternion.Euler(MP.rX, MP.rY, MP.rZ);
+        //                    break;
+        //                case BasePacket.type.InstantiateType:
+        //                    InstantiatePacket IP = (InstantiatePacket)BP;
+
+        //                    Instantiate(Resources.Load<GameObject>(IP.objectName),
+        //                   (IP.position.GetVector()),
+        //                        Quaternion.Euler(IP.rotation.GetVector()));
+        //                    //AddInGOList(tempGOReceive);
+        //                    break;
+        //                case BasePacket.type.SceneTransitionType:
+        //                    SceneTransitionPacket stp = (SceneTransitionPacket)BP;
+        //                    SceneManager.LoadScene(stp.sceneIndex);
+        //                    break;
+        //                default:
+        //                    break;
+        //            }
+        //        }
+        //        catch
+        //        {
+
+        //            print("recevin error");
+        //        }
+
+        //        //    Debug.LogError(Encoding.ASCII.GetString(buffer));
+
+        //    }
+        //    catch (SocketException ex)
+        //    {
+        //        if (ex.SocketErrorCode != SocketError.WouldBlock)
+        //        {
+        //            Debug.LogError(ex);
+        //        }
+
+        //    }
+        //}
 
     }
     public void InstanOnNet(string goName, Vector3 pos, Vector3 rot)
@@ -281,6 +461,12 @@ public class NetworkManagerScript : MonoBehaviour
                (ip.position.GetVector()),
                    Quaternion.Euler(ip.rotation.GetVector()));
         //AddInGOList(tempGOMethod);
+    }
+    public void InstanPlayerOnNet() 
+    {
+        
+    
+    
     }
     public void LevelSelectionButton(int i)
     {
