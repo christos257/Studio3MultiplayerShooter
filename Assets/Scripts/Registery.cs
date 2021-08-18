@@ -44,46 +44,32 @@ public class Registery : MonoBehaviour
     public InputField usernameInput;
     public InputField passwordInput;
 
-    public static string firstNameInputText;
-    public static string lastNameInputText;
-    public static string ageInputText;
-    public static string emailInputText;
-    public static string usernameInputText;
-    public static string passwordInputText;
 
-    UserData userData = new UserData()
-    {
-        fname = firstNameInputText,
-        lname = lastNameInputText,
-        age = ageInputText,
-        email = emailInputText,
-        username = usernameInputText,
-        password = passwordInputText
-    };
+    UserData userData;
 
     UsersData[] usersData;
 
-    UserData userDatas = new UserData()
-    {
-        fname = firstNameInputText
-    };
-
+  
     void Start()
     {
-        firstNameInputText = firstNameInput.text;
-        lastNameInputText = lastNameInput.text;
-        ageInputText = ageInput.text;
-        emailInputText = emailInput.text;
-        usernameInputText = usernameInput.text;
-        passwordInputText = passwordInput.text;
-        //StartCoroutine(SendUserDataUsingGetRequest(userData.GetDataInUrlEncoding()));
-        //StartCoroutine(SendUserDataUsingPostRequest(getDataserverUrl, userData));
+         
         //StartCoroutine(GetUserDataUsingGetRequest(getDataserverUrl, userDatas.GetNameInUrlEncoding()));
     }
 
     public void UserData()
     {
-        StartCoroutine(GetUserDataUsingGetRequest(getDataserverUrl, userDatas.GetNameInUrlEncoding()));
+        userData = new UserData()
+        {
+            fname = firstNameInput.text,
+            lname = lastNameInput.text,
+            age = ageInput.text,
+            email = emailInput.text,
+            username = usernameInput.text,
+            password = passwordInput.text
+        };
+        //StartCoroutine(SendUserDataUsingGetRequest(sendDataserverUrl, userData.GetDataInUrlEncoding()));
+        StartCoroutine(SendUserDataUsingPostRequest(sendDataserverUrl, userData));
+        //StartCoroutine(GetUserDataUsingGetRequest(getDataserverUrl, userData.GetNameInUrlEncoding()));
     }
 
 
