@@ -14,7 +14,7 @@ public class User1Script : MonoBehaviour
     Vector3 target = new Vector3();
     public Transform sp;
 
-    int userID;
+    public string userScriptId;
     public GameObject laserTrap;
     bool trapShot;
     bool trapActivated;
@@ -46,7 +46,7 @@ public class User1Script : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (NetworkManagerScript.instance.usernameInputString == "1")
+        if (NetworkManagerScript.instance.nmID == userScriptId)
         {
             Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
             if (!spinning && Physics.Raycast(ray, out RaycastHit raycastHit))
