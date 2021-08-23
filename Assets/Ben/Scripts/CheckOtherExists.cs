@@ -25,6 +25,8 @@ public class CheckOtherExists : MonoBehaviour
             buttonOne.interactable = true;
             buttonTwo.interactable = true;
             otherDoesExist = true;
+
+           
         }
     }
 }

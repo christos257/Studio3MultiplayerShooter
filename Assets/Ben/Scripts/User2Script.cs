@@ -14,7 +14,7 @@ public class User2Script : MonoBehaviour
     Vector3 target = new Vector3();
     public Transform sp;
 
-
+    public string userScriptId;
     public GameObject laserTrap;
     bool trapShot;
     bool trapActivated;
@@ -46,8 +46,18 @@ public class User2Script : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (NetworkManagerScript.instance.usernameInputString == "2")
+        if (NetworkManagerScript.instance.nmID == userScriptId)
         {
+            Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
+            if (!spinning && Physics.Raycast(ray, out RaycastHit raycastHit))
+            {
+                target = raycastHit.point;
+                // target.x = transform.position.x;
+                target.y = transform.position.y;
+                transform.LookAt(target);
+
+
+            }
             //if (Input.GetKey(KeyCode.W))
             //{
             //    transform.Translate(0, 0, 1 * Time.deltaTime * speed, Space.World);
@@ -96,16 +106,7 @@ public class User2Script : MonoBehaviour
             {
                 rb.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
             }
-            Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
-            if (!spinning && Physics.Raycast(ray, out RaycastHit raycastHit))
-            {
-                target = raycastHit.point;
-                // target.x = transform.position.x;
-                target.y = transform.position.y;
-                transform.LookAt(target);
 
-
-            }
             if (Input.GetMouseButtonDown(0))
             {
                 if (GameManager.instance.prepDone)
