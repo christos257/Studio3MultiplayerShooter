@@ -335,6 +335,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c877cfca297db542845acd5fb453c5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  laserDamage: 99
 --- !u!1001 &7621694523606104419
 PrefabInstance:
   m_ObjectHideFlags: 0

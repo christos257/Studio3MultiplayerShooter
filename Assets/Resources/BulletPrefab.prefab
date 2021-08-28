@@ -109,3 +109,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 18
+  bulletDamage: 15

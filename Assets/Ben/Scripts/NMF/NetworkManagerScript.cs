@@ -296,6 +296,12 @@ public class NetworkManagerScript : MonoBehaviour
                                     heyThereCount = 0;
                                 }
                             }
+                            else if (CP.message == "iLose")
+                            {
+
+                                GameManager.instance.iWin = true;
+                            }
+
                             Debug.LogError(CP.username + ": " + CP.message);
                             break;
                         case BasePacket.type.MovementType:
@@ -385,7 +391,19 @@ public class NetworkManagerScript : MonoBehaviour
 
 
     }
+    public void SendMessageOnNet(string mes) 
+    {
+        ChatPacket cp = new ChatPacket();
+        cp.username = nmID;
+        cp.message = mes;
+        sendQueue.Enqueue(cp);
 
+    }
+    public void SceneChangeOnNet(int i) 
+    {
+
+        LevelSelectionButton(i);
+    }
     public void LevelJoined()
     {
         if (iAmHost)
@@ -395,7 +413,10 @@ public class NetworkManagerScript : MonoBehaviour
                 user1GO = GameObject.Find("user1");
                 user2GO = GameObject.Find("user2");
 
-                user1GO.GetComponent<User1Script>().userScriptId = nmID;
+                user1GO.GetComponent<UserScript>().userScriptId = nmID;
+                user1GO.GetComponent<UserScript>().isMine = true;
+                user2GO.GetComponent<UserScript>().isMine = false;
+                GameManager.instance.userID = 1;
                 objSendList.Add(user1GO);
                 print("user id assigned");
             }
@@ -412,7 +433,10 @@ public class NetworkManagerScript : MonoBehaviour
                 user1GO = GameObject.Find("user1");
                 user2GO = GameObject.Find("user2");
 
-                user2GO.GetComponent<User2Script>().userScriptId = nmID;
+                user2GO.GetComponent<UserScript>().userScriptId = nmID;
+                user2GO.GetComponent<UserScript>().isMine = true;
+                user1GO.GetComponent<UserScript>().isMine = false;
+                GameManager.instance.userID = 2;
                 objSendList.Add(user2GO);
                 print("user id assigned");
             }

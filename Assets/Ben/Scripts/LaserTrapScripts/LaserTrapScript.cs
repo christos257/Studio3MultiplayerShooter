@@ -6,7 +6,7 @@ public class LaserTrapScript : MonoBehaviour
 {
     LineRenderer lr;
     GameObject firePE;
-
+    public float laserDamage;
 
     void Start()
     {
@@ -32,7 +32,7 @@ public class LaserTrapScript : MonoBehaviour
 
                     firePE.SetActive(true);
                     firePE.transform.SetPositionAndRotation(rHit.point, Quaternion.identity);
-
+                    rHit.collider.gameObject.GetComponent<UserScript>().hp -= laserDamage * Time.deltaTime;
 
                 }
                 else if (firePE.activeSelf)
