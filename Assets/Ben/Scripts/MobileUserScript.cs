@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UserScript : MonoBehaviour
+public class MobileUserScript : MonoBehaviour
 {
     public float speed;
     public float jumpSpeed;
@@ -22,15 +22,12 @@ public class UserScript : MonoBehaviour
     public bool isMine;
     GameObject tempTrap;
     Rigidbody rb;
-    public float mH;
-    public float mV;
+    float mH;
+    float mV;
     public bool spinning;
     public bool canSpin;
     public int laserTrapAmmo;
     public float hp;
-
-    public FloatSO mhSO;
-    public FloatSO mvSO;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -68,7 +65,7 @@ public class UserScript : MonoBehaviour
 
 
             }
-            if (isAlive && hp<=0)
+            if (isAlive && hp <= 0)
             {
                 Debug.LogError("I died my friend");
                 isAlive = false;
@@ -117,56 +114,12 @@ public class UserScript : MonoBehaviour
                 gameObject.tag = "Spinning";
 
             }
-            //mH = Input.GetAxis("Horizontal");
-            //mV = Input.GetAxis("Vertical");
-            mH = mhSO.value;
-            mV = mvSO.value;
+            mH = Input.GetAxis("Horizontal");
+            mV = Input.GetAxis("Vertical");
             rb.velocity = new Vector3(mH * speed, rb.velocity.y, mV * speed);
-            if (Input.touchCount>0)
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                if (GameManager.instance.prepDone)
-                {
-                    NetworkManagerScript.instance.InstanOnNet("BulletPrefab", new Vector3(sp.position.x, sp.position.y, sp.position.z), new Vector3(0, transform.eulerAngles.y, 0));
-
-                }
-                else
-                {
-                    if (laserTrapAmmo > 0 )
-                    {
-                        if (!trapShot)
-                        {
-                            Touch touch = Input.GetTouch(0);
-                            
-                            Ray mobileRays = mainCam.ScreenPointToRay(touch.position);
-                            if (Physics.Raycast(mobileRays, out RaycastHit raycastHits))
-                            {
-                                if (raycastHits.transform.gameObject.tag == "Wall")
-                                {
-                                    tempTrap = Instantiate(laserTrap, new Vector3(raycastHits.point.x, -0.5f, raycastHits.point.z), Quaternion.identity);
-                                    trapShot = true;
-                                }
-
-
-                            }
-                        }
-                        else if (trapShot)
-                        {
-                            Ray mobileRays = mainCam.ScreenPointToRay(Input.mousePosition);
-                            if (Physics.Raycast(mobileRays, out RaycastHit raycastHits))
-                            {
-                                tempTrap.transform.LookAt(raycastHits.point);
-                                trapShot = false;
-                                NetworkManagerScript.instance.InstanOnNet("LaserTrap",
-                                                      new Vector3(tempTrap.transform.position.x, -0.5f, tempTrap.transform.position.z),
-                                                         new Vector3(0, tempTrap.transform.eulerAngles.y, tempTrap.transform.eulerAngles.z));
-                                Destroy(tempTrap.gameObject);
-                                laserTrapAmmo--;
-                            }
-
-                        }
-                    }
-                }
-              
+                rb.AddForce(Vector3.up * jumpSpeed, ForceMode.Impulse);
             }
 
             if (Input.GetMouseButtonDown(0))
