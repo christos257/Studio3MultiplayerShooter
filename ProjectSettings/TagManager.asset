@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Wall
   - Spinning
+  - Floor
   layers:
   - Default
   - TransparentFX

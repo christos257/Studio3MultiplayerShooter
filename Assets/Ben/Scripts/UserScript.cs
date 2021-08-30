@@ -31,6 +31,8 @@ public class UserScript : MonoBehaviour
 
     public FloatSO mhSO;
     public FloatSO mvSO;
+    public BoolSO moveBO;
+    public BoolSO spinBO;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -58,17 +60,8 @@ public class UserScript : MonoBehaviour
     {
         if (NetworkManagerScript.instance.nmID == userScriptId)
         {
-            Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
-            if (!spinning && Physics.Raycast(ray, out RaycastHit raycastHit))
-            {
-                target = raycastHit.point;
-                // target.x = transform.position.x;
-                target.y = transform.position.y;
-                transform.LookAt(target);
 
-
-            }
-            if (isAlive && hp<=0)
+            if (isAlive && hp <= 0)
             {
                 Debug.LogError("I died my friend");
                 isAlive = false;
@@ -109,12 +102,13 @@ public class UserScript : MonoBehaviour
                     cantSpinTimer = 0;
                 }
             }
-            if (Input.GetKeyDown(KeyCode.LeftShift) && canSpin)
+            if (spinBO.value && canSpin)
             {
                 spinning = true;
                 canSpin = false;
                 Spin();
                 gameObject.tag = "Spinning";
+                spinBO.value = false;
 
             }
             //mH = Input.GetAxis("Horizontal");
@@ -122,98 +116,121 @@ public class UserScript : MonoBehaviour
             mH = mhSO.value;
             mV = mvSO.value;
             rb.velocity = new Vector3(mH * speed, rb.velocity.y, mV * speed);
-            if (Input.touchCount>0)
+            if (Input.touchCount > 0)
             {
-                if (GameManager.instance.prepDone)
+                Touch touch = Input.GetTouch(0);
+
+
+                if (/*!moveBO.value && */GameManager.instance.prepDone)
                 {
-                    NetworkManagerScript.instance.InstanOnNet("BulletPrefab", new Vector3(sp.position.x, sp.position.y, sp.position.z), new Vector3(0, transform.eulerAngles.y, 0));
+                    foreach (Touch t in Input.touches)
+                    {
+                        Ray ray = mainCam.ScreenPointToRay(t.position);
+                        if (!spinning && Physics.Raycast(ray, out RaycastHit raycastHit) && raycastHit.collider.tag == "Floor")
+                        {
+                            target = raycastHit.point;
+                            // target.x = transform.position.x;
+                            target.y = transform.position.y;
+                            transform.LookAt(target);
+
+                            if (t.phase == TouchPhase.Began )
+                            {
+                                NetworkManagerScript.instance.InstanOnNet("BulletPrefab", new Vector3(sp.position.x, sp.position.y, sp.position.z), new Vector3(0, transform.eulerAngles.y, 0));
+                            }
+                        }
+                    }
+                   
 
                 }
                 else
                 {
-                    if (laserTrapAmmo > 0 )
+                    if (laserTrapAmmo > 0)
                     {
-                        if (!trapShot)
+
+                        if (touch.phase == TouchPhase.Began)
                         {
-                            Touch touch = Input.GetTouch(0);
-                            
-                            Ray mobileRays = mainCam.ScreenPointToRay(touch.position);
-                            if (Physics.Raycast(mobileRays, out RaycastHit raycastHits))
+                            if (!trapShot)
                             {
-                                if (raycastHits.transform.gameObject.tag == "Wall")
+
+                                Ray mobileRays = mainCam.ScreenPointToRay(touch.position);
+                                if (Physics.Raycast(mobileRays, out RaycastHit raycastHits))
                                 {
-                                    tempTrap = Instantiate(laserTrap, new Vector3(raycastHits.point.x, -0.5f, raycastHits.point.z), Quaternion.identity);
-                                    trapShot = true;
+                                    if (raycastHits.collider.tag == "Wall")
+                                    {
+                                        tempTrap = Instantiate(laserTrap, new Vector3(raycastHits.point.x, -0.5f, raycastHits.point.z), Quaternion.identity);
+                                        trapShot = true;
+                                    }
+
+
+                                }
+                            }
+                            else if (trapShot)
+                            {
+                                Ray mobileRays = mainCam.ScreenPointToRay(touch.position);
+                                if (Physics.Raycast(mobileRays, out RaycastHit raycastHits))
+                                {
+                                    tempTrap.transform.LookAt(raycastHits.point);
+                                    trapShot = false;
+                                    NetworkManagerScript.instance.InstanOnNet("LaserTrap",
+                                                          new Vector3(tempTrap.transform.position.x, -0.5f, tempTrap.transform.position.z),
+                                                             new Vector3(0, tempTrap.transform.eulerAngles.y, tempTrap.transform.eulerAngles.z));
+                                    Destroy(tempTrap.gameObject);
+                                    laserTrapAmmo--;
                                 }
 
-
                             }
-                        }
-                        else if (trapShot)
-                        {
-                            Ray mobileRays = mainCam.ScreenPointToRay(Input.mousePosition);
-                            if (Physics.Raycast(mobileRays, out RaycastHit raycastHits))
-                            {
-                                tempTrap.transform.LookAt(raycastHits.point);
-                                trapShot = false;
-                                NetworkManagerScript.instance.InstanOnNet("LaserTrap",
-                                                      new Vector3(tempTrap.transform.position.x, -0.5f, tempTrap.transform.position.z),
-                                                         new Vector3(0, tempTrap.transform.eulerAngles.y, tempTrap.transform.eulerAngles.z));
-                                Destroy(tempTrap.gameObject);
-                                laserTrapAmmo--;
-                            }
-
-                        }
-                    }
-                }
-              
-            }
-
-            if (Input.GetMouseButtonDown(0))
-            {
-                if (GameManager.instance.prepDone)
-                {
-                    NetworkManagerScript.instance.InstanOnNet("BulletPrefab", new Vector3(sp.position.x, sp.position.y, sp.position.z), new Vector3(0, transform.eulerAngles.y, 0));
-
-                }
-            }
-            if (Input.GetMouseButtonDown(1))
-            {
-                //  NM.instance.InstanOnNet("BulletPrefab", new Vector3(sp.position.x, sp.position.y, sp.position.z), new Vector3(0, transform.eulerAngles.y, 0));
-                if (laserTrapAmmo > 0 && !GameManager.instance.prepDone)
-                {
-                    if (!trapShot)
-                    {
-                        Ray rays = mainCam.ScreenPointToRay(Input.mousePosition);
-                        if (Physics.Raycast(rays, out RaycastHit raycastHits))
-                        {
-                            if (raycastHits.transform.gameObject.tag == "Wall")
-                            {
-                                tempTrap = Instantiate(laserTrap, new Vector3(raycastHits.point.x, -0.5f, raycastHits.point.z), Quaternion.identity);
-                                trapShot = true;
-                            }
-
-
-                        }
-                    }
-                    else if (trapShot)
-                    {
-                        Ray rays = mainCam.ScreenPointToRay(Input.mousePosition);
-                        if (Physics.Raycast(rays, out RaycastHit raycastHits))
-                        {
-                            tempTrap.transform.LookAt(raycastHits.point);
-                            trapShot = false;
-                            NetworkManagerScript.instance.InstanOnNet("LaserTrap",
-                                                  new Vector3(tempTrap.transform.position.x, -0.5f, tempTrap.transform.position.z),
-                                                     new Vector3(0, tempTrap.transform.eulerAngles.y, tempTrap.transform.eulerAngles.z));
-                            Destroy(tempTrap.gameObject);
-                            laserTrapAmmo--;
                         }
 
                     }
                 }
 
             }
+
+            //if (Input.GetMouseButtonDown(0))
+            //{
+            //    if (GameManager.instance.prepDone)
+            //    {
+            //        NetworkManagerScript.instance.InstanOnNet("BulletPrefab", new Vector3(sp.position.x, sp.position.y, sp.position.z), new Vector3(0, transform.eulerAngles.y, 0));
+
+            //    }
+            //}
+            //if (Input.GetMouseButtonDown(1))
+            //{
+            //    //  NM.instance.InstanOnNet("BulletPrefab", new Vector3(sp.position.x, sp.position.y, sp.position.z), new Vector3(0, transform.eulerAngles.y, 0));
+            //    if (laserTrapAmmo > 0 && !GameManager.instance.prepDone)
+            //    {
+            //        if (!trapShot)
+            //        {
+            //            Ray rays = mainCam.ScreenPointToRay(Input.mousePosition);
+            //            if (Physics.Raycast(rays, out RaycastHit raycastHits))
+            //            {
+            //                if (raycastHits.transform.gameObject.tag == "Wall")
+            //                {
+            //                    tempTrap = Instantiate(laserTrap, new Vector3(raycastHits.point.x, -0.5f, raycastHits.point.z), Quaternion.identity);
+            //                    trapShot = true;
+            //                }
+
+
+            //            }
+            //        }
+            //        else if (trapShot)
+            //        {
+            //            Ray rays = mainCam.ScreenPointToRay(Input.mousePosition);
+            //            if (Physics.Raycast(rays, out RaycastHit raycastHits))
+            //            {
+            //                tempTrap.transform.LookAt(raycastHits.point);
+            //                trapShot = false;
+            //                NetworkManagerScript.instance.InstanOnNet("LaserTrap",
+            //                                      new Vector3(tempTrap.transform.position.x, -0.5f, tempTrap.transform.position.z),
+            //                                         new Vector3(0, tempTrap.transform.eulerAngles.y, tempTrap.transform.eulerAngles.z));
+            //                Destroy(tempTrap.gameObject);
+            //                laserTrapAmmo--;
+            //            }
+
+            //        }
+            //    }
+
+            //}
 
         }
 
